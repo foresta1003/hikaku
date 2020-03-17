@@ -97,6 +97,19 @@ DATABASES = {
 
 #新規でデータベース作成時は環境変数を使用する事
 
+"""
+DATABASES = {
+    'default': {
+        環境変数を使用する事
+        'ENGINE': 環境変数を使用する事
+        'NAME':
+        'USER':
+        'PASSWORD':　
+        'HOST':
+        'PORT':
+    }
+}
+"""
 # Password validation
 # https://docs.djangoproject.com/en/3.0/ref/settings/#auth-password-validators
 
@@ -124,7 +137,7 @@ LANGUAGE_CODE = 'ja'
 TIME_ZONE = 'Asia/Tokyo'
 
 USE_I18N = True
-
+±
 USE_L10N = True
 
 USE_TZ = True
@@ -138,6 +151,12 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = (
     os.path.join(BASE_DIR, "static")
 )
+
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_URL = '/media/'
+
+
+
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 #mail(メール)設定
@@ -157,8 +176,10 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 #以下は認証機能
 
+#アカウントユーザーモデルの拡張 指定する事によってこのモデルを使用するアカウントが作成される
 AUTH_USER_MODEL = 'accounts.CustomUser'
 
+#django-allauthで利用するdjango.contrib.sitesを使うためにサイト識別用IDを設定
 SITE_ID = 1
 
 AUTHENTICATION_BACKENDS = (
@@ -166,7 +187,13 @@ AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend', #管理サイト用(ユーザー名認証)
 )
 
+"""
 #メールアドレス認証に変更する設定
+ACCOUNT_AUTHENTICATION_METHOD ='email'
+ACCOUNT_USERNAME_REQUIRED = False
+"""
+
+#サインアップにメールアドレス確認を挟むよう設定
 ACCOUNT_EMAIL_VERIFICATION = 'none' #有効化する際は'mandatory'
 ACCOUNT_EMAIL_REQUIRED = True
 
@@ -174,7 +201,7 @@ ACCOUNT_EMAIL_REQUIRED = True
 LOGIN_REDIRECT_URL = 'scraping:index'
 ACCOUNT_LOGOUT_REDIRECT_URL ='account_login'
 
-#ログアウトリンクのクリック一髪でログアウトする設定
+#ログアウトリンクのクリック一発でログアウトする設定
 ACCOUNT_LOGOUT_ON_GET = True
 
-SITE_ID = 1 #
+
