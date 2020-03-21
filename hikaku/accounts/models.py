@@ -10,11 +10,11 @@ class CustomUser(AbstractUser):
         verbose_name_plural = "CustomUser"
     
     user_name = models.CharField(verbose_name='usrname', max_length=30, unique=True)
-    full_name = models.CharField('指名', max_length==20,　blank=True)
+    full_name = models.CharField('指名', max_length=20, blank=True)
     email = models.EmailField(verbose_name='email_address')
-    department = models.CharField(vrebose_name='所属', max_length=30)
-    update_time = models.DateField(vrebose_name='更新日時', auto_now=True)
-    create_time = models.DateField(vrebose_name='作成日時', auto_now_add=True)
+    department = models.CharField(verbose_name='所属', max_length=30)
+    update_time = models.DateField(verbose_name='更新日時', auto_now=True)
+    create_time = models.DateField(verbose_name='作成日時', auto_now_add=True)
 
     def __str__(self):
         return self.user_name

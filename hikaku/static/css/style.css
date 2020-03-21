@@ -1,3 +1,8 @@
+.all {
+    margin-left: 1%;
+    margin-right: 1%;
+}
+
 header {
     margin-top: 30px;
     color: #2e99a9;
@@ -16,4 +21,39 @@ h1 {
 
 .align-right {
     text-align: rigdeactivaht;
+}
+
+
+
+.left_column {
+    float: left;
+    width: 18%;
+    min-width: 170px;
+    font-size: 17px;
+    margin-left: 0;
+    background-color:rgb(130, 180, 238);
+}
+
+.center_column {
+    float: center;
+    width: 82%;
+    min-width: 300px;
+    margin-left: 20%;
+    margin-right:10%;
+    font-size: 15px;
+}
+
+.center_left {
+    float: left;
+    margin-left: 1%;
+    width: 27%;
+    font-size: 14px;
+
+}
+
+.center_right {
+    margin-left: 55%;
+    width: 27%;
+    font-size: 14px;
+
 }

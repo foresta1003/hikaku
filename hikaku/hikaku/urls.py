@@ -16,14 +16,15 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from django.contrib.staticfiles.urls import static
-from .accounts import urls
-from .scraping import urls
+from django
+from . import settings
 
 urlpatterns = [
     path('admin/', admin.site.urls), #
-    path('', include(scraping.urls)),
+    path('', include('scraping.urls')),
+    path('accounts/signup/', views.SignupView.as_view(template_name = 'account/signup.html'), name='account_signup'),
     path('accounts/', include('allauth.urls')),
 ]
 
 #メディアを配信できるようにする設定
-urlpatterns += static(settings.MEDIA_URL, document_root = setttings.MEDIA_ROOT)
+urlpatterns += static(settings.MEDIA_URL, document_root = settings.MEDIA_ROOT)

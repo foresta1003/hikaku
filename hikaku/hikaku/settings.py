@@ -14,9 +14,13 @@ import os
 import environ
 
 #環境変数用のBASE_DIR
-ENV_BASE_DIR = environ.Path(__file__) - 1 #.envファイルのディレクトリ
-env = environ.Env() 
-env = env.read_env(ENV_BASE_DIR.path(".env"))
+ENV_BASE_DIR = environ.Path(__file__) - 2 #.envファイルのディレクトリ
+env = environ.Env(DEBUG=(bool, False)) 
+READ_ENV_FILE = env.bool('DJANGO_READ_ENV_FILE', default=False)
+
+env = env.read_env(str(ENV_BASE_DIR.path(".env")))
+
+
 
 
 
@@ -28,7 +32,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = env('ENV_BASE_DIR')
+SECRET_KEY = env('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -137,7 +141,7 @@ LANGUAGE_CODE = 'ja'
 TIME_ZONE = 'Asia/Tokyo'
 
 USE_I18N = True
-±
+
 USE_L10N = True
 
 USE_TZ = True
@@ -148,9 +152,9 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 #静的ファイルを読み込むための設定
-STATICFILES_DIRS = (
+STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "static")
-)
+]
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
@@ -198,7 +202,7 @@ ACCOUNT_EMAIL_VERIFICATION = 'none' #有効化する際は'mandatory'
 ACCOUNT_EMAIL_REQUIRED = True
 
 #ログイン/ログアウト後の遷移先を設定
-LOGIN_REDIRECT_URL = 'scraping:index'
+LOGIN_REDIRECT_URL = 'scraping:index' #'accounts:home' ユーザーホーム画面の作成
 ACCOUNT_LOGOUT_REDIRECT_URL ='account_login'
 
 #ログアウトリンクのクリック一発でログアウトする設定

@@ -1,2 +1,63 @@
-{% extends 'base.html' %}
+{% extends 'scraping/base.html' %}
 
+{% load static %}
+{% block title %} scraping {% endblock %}
+{% block head %}
+<link rel="stylesheet" href="{% static 'css/style.css' %}"> 
+{% endblock %}
+
+{% block contents %}
+
+<!--tagsのなかの文字列でグループ分けを行っている-->
+<div class="left_column">
+  <form action="{% url 'scraping:index' %}" method="get">
+    <input type="text" name="item_name">
+    <button type="submit" class="btn btn-secondary">送信</button>
+    {% csrf_token %}
+    {% if item_name %}
+    <h5>{{ item_name }}の検索結果</h5>
+    {% endif %}
+    <br>
+    <input type="radio" name="new_old" value="0" id="id_tags_none">
+    <label for="id_tags_none">指定なし</label>
+    <input type="radio" name="new_old" value="1" id="id_tags_new">
+    <label for="id_tags_new">新品</label>
+    <input type="radio" name="new_old" value="2" id="id_tags_old">
+    <label for="id_tags_old">中古</label>
+
+    <br>
+    <input type="radio" name="order" value="1" id="id_tags_old">
+    <label for="id_tags_recommend">おすすめ順</label>
+    <input type="radio" name="order" value="2" id="id_tags_old">
+    <label for="id_tags_cheap">安い順</label>
+  </form>
+</div>
+<div class="center_left">
+  {% if yahoo_item_list %}
+  <ul class="yahoo_loop_list">
+    {% for yahoo_item in yahoo_item_list %}
+    <p>{{ yahoo_item.1 }}</p>
+    <li>【実質価格】{{ yahoo_item.4 }}円</li>
+    <li>商品詳細⇒<a href="{{ yahoo_item.6 }}">リンク</a> </li>
+    <p><img src="{{ yahoo_item.5 }}" width="20%" height="20%" border="0" /></p>
+    {% endfor %}
+  </ul>
+  {% endif %}
+</div>
+
+
+<div class="center_right">
+  {% if rakuten_item_list %}
+  <ul class="rakuten_loop_list">
+    {% for rakuten_item in rakuten_item_list %}
+    <p>{{ rakuten_item.1 }}</p>
+    <li>【実質価格】{{ rakuten_item.4 }}円</li>
+    <li>商品詳細⇒<a href="{{ rakuten_item.6 }}">リンク</a></li>
+    <p><img src="{{ rakuten_item.5 }}" width="20%" height="20%" border="0" /></p>
+    {% endfor %}
+  </ul>
+  {% endif %}
+</div>
+
+{% endblock %}
+</div>
