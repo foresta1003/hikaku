@@ -8,14 +8,28 @@ header {
     color: #2e99a9;
 }
 
+/*
 hr {
     border-width: 3px;
     border-color: #2e99a9;
+}
+*/
+
+.hr_ver1 {
+    display: block;
+    border: 0;
+    border-width: 2px;
+    border-color: #dba45c;
 }
 
 h1 {
     font-size: 18px;
     font-weight: bold;
+    margin: 0;
+}
+
+h3 {
+    font-size: 10px;
     margin: 0;
 }
 
@@ -56,4 +70,22 @@ h1 {
     width: 27%;
     font-size: 14px;
 
+}
+
+.scraping_main {
+    margin-left: 10%;
+    width: 80%;
+    font-size: 15px;
+}
+
+.scraping_top_column {
+    margin-left: 10%;
+    width: 80%;
+    font-size: 20px;
+}
+
+.scraping_top_column_status {
+    margin-left: 10%;
+    width: 80%;
+    font-size: 15px;
 }

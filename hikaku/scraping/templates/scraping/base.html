@@ -1,3 +1,4 @@
+{% load static %}
 <!doctype html>
 <html lang="ja">
 
@@ -21,11 +22,13 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
         integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
         crossorigin="anonymous"></script>
-    
-    <link rel="stylesheet" href="../../../static/css/style.css"> <!--後で調整すること-->
+
+    <link rel="stylesheet" href="../../../static/css/style.css">
+    <!--後で調整すること-->
 
 
     <title>価格比較</title>
+    {% block head %}{% endblock %}
 </head>
 
 <body>
@@ -37,11 +40,13 @@
                     <h1>価格比較</h1>
                 </div>
                 <div class="col-sm-6 align-right">
-                    <a href="accounts">HOMEへ戻る</a>
+                    <a href="{% url 'home' %}">HOMEへ戻る</a>
                 </div>
             </div>
         </header>
+
         <hr>
+    {% block contents %}{% endblock %}
 
         <hr>
 
@@ -50,10 +55,6 @@
 
         </footer>
     </div>
-
-
-
-
 
 
 

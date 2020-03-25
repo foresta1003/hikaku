@@ -9,8 +9,8 @@ class CustomUser(AbstractUser):
     class Meta:
         verbose_name_plural = "CustomUser"
     
-    user_name = models.CharField(verbose_name='usrname', max_length=30, unique=True)
-    full_name = models.CharField('指名', max_length=20, blank=True)
+    user_name = models.CharField(verbose_name='ユーザー名', max_length=30, unique=True)
+    full_name = models.CharField('氏名', max_length=20, blank=True)
     email = models.EmailField(verbose_name='email_address')
     department = models.CharField(verbose_name='所属', max_length=30)
     update_time = models.DateField(verbose_name='更新日時', auto_now=True)

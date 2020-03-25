@@ -59,6 +59,7 @@ def signup_func(request):
         return render(request, 'account/signup.html', context)
     return render(request, 'account/signup.html', context)
 
+#ユーザーホーム画面の表示(ユーザー名、本名、email-address を表示)
 def home(request):
     print(CustomUser.objects.all())
     print(request.user)

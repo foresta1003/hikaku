@@ -1,9 +1,10 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.views import generic
 import requests
 import lxml.html
 import lxml
 import shutil
+
 
 
 # Create your views here.
@@ -19,27 +20,46 @@ class IndexView(generic.TemplateView):
         self.item_status = "0"  # 0=指定なし 1=新品　2=中古
         self.item_order = "0"  # 0=指定なし　1=安い順
 
+    #メイン処理　クラスビューで呼び出された場合はget()が呼び出される　→　get()をオーバーライドすること
     def get(self, request, *args, **kwargs):
-        #メイン処理
+        
         #サイトへの1回目の訪問時に商品名の入力がないとプログラムが動かないためtry文で処理する
         try:
             self.item_name = request.GET.get("item_name")
         except:
             pass
+        #ユーザーがログインしていない場合はログイン画面にリダイレクトさせる
+        if request.user.is_authenticated:
+            pass
+        else:
+            return redirect("account_login")
 
         if self.item_name:
             self.item_name = request.GET.get("item_name")  # 検索窓に入力された商品名を取り出す
             self.item_status = request.GET.get("status")  # ラジオボタンから選択肢を取得
             self.item_order = request.GET.get("order")
-
+            if self.item_status == None:
+                self.item_status = "0"
+            if self.item_order == None:
+                self.item_order = "0"
+            print(self.item_status,self.item_order)
+            
             # リストの形式で返されるので下記のように値を取り出す
 
             yahoo_list = self.search_yahoo_item_and_create_list(self.item_name)  # 商品を検索及び商品リストを作成(yahoo)
             rakuten_list = self.search_rakuten_item_and_create_list(self.item_name)  # 商品検索及び商品のリストを作成(楽天)
+            yahoo_and_rakuten_item_list = []
+            for i in range(5):
+                tmp_yahoo_and_rakuten_list = []
+                tmp_yahoo_and_rakuten_list.append(yahoo_list[i])
+                tmp_yahoo_and_rakuten_list.append(rakuten_list[i])
+                yahoo_and_rakuten_item_list.append(tmp_yahoo_and_rakuten_list)
         
             context = {
                 'yahoo_item_list': yahoo_list,
                 'rakuten_item_list': rakuten_list,
+                'yahoo_and_rakuten_item_list': yahoo_and_rakuten_item_list,
+                'item_name': self.item_name,
             }
         
         else:
@@ -48,17 +68,17 @@ class IndexView(generic.TemplateView):
                 'yahoo_item_list': None,
                 'rakuten_item_list': None,
             }
-
         return render(request, 'scraping/index.html', context)
-
 
 
     def search_yahoo_item_and_create_list(self, item_name):
         """商品検索及びリスト作成"""
         if self.item_status == "1":  # 新品ならば
             yahoo_item_status = "2"
-        elif self.item_order == "2":  # 中古ならば
+        elif self.item_status == "2":  # 中古ならば
             yahoo_item_status = "1"
+        else:
+            yahoo_item_status = "0"
 
         req = requests.get(self.site_url_yahoo, params={'p': item_name, 'used': yahoo_item_status})
         html_yahoo = lxml.html.fromstring(req.text)
@@ -77,21 +97,23 @@ class IndexView(generic.TemplateView):
 
         #ポイント適用後の価格を計算する処理を記述すること
 
-        yahoo_item_list = [] #index, ,商品名, 価格, ポイント, ポイント適用後の価格, 商品画像, 商品詳細ページへのリンクURL)
+        yahoo_item_list = [] #[index, ,商品名, 価格, ポイント, ポイント適用後の価格, 商品画像, 商品詳細ページへのリンクURL])
         index = 1
         for n in range(5): #
             tmp_item_list = []
             tmp_item_list.append(index) #index
             tmp_item_list.append(tmp_item_name_object_list[n].text) #商品名
-            value = int(tmp_item_value_object_list[n].text.replace(",", "")) #価格
-            point_percentage  = int(tmp_item_point_percentage_object_list[n].text) #ポイント
-            value_after_discount = value * (100 - point_percentage) #割引き後価格
             
+            value = int(tmp_item_value_object_list[n].text.replace(",", "")) #価格
+            point_percentage  = int(tmp_item_point_percentage_object_list[n].text) #ポイントのパーセンテージ
+            point = value * point_percentage // 100 #ポイント
+            value_after_discount = value - point #割引き後価格(値段からパーセンテージを差し引いた価格)
+            value_after_discount = "{:,}".format(value_after_discount)
             tmp_item_list.append(value)
-            tmp_item_list.append(point_percentage)
+            tmp_item_list.append(point)
             tmp_item_list.append(value_after_discount) 
             tmp_item_list.append(item_img_path_list[n]) #商品画像(ローカルのパス)
-            tmp_item_list.append(tmp_item_details_link_object_list[n]) #商品詳細ページ
+            tmp_item_list.append(tmp_item_details_link_object_list[n].attrib["href"]) #商品詳細ページ
             #tmp_item_list.append(tmp_item_details_link_object_list[n]["href"]) #商品詳細ページ
             yahoo_item_list.append(tmp_item_list)
         
@@ -104,6 +126,8 @@ class IndexView(generic.TemplateView):
             rakuten_item_status = "0"
         elif self.item_order == "2":  # 中古ならば
             rakuten_item_status = "1"
+        else:
+            rakuten_item_status = "0"
 
         req = requests.get(self.site_url_rekuten + item_name , params={'used': rakuten_item_status})
         html_rakuten = lxml.html.fromstring(req.text)
@@ -126,13 +150,15 @@ class IndexView(generic.TemplateView):
             tmp_item_list.append(n+1)
             tmp_item_list.append(tmp_item_name_and_link_object_list[n].text)  #商品名
             value = int(tmp_item_value_object_list[0].text.replace(",", ""))
-            point = int(tmp_item_point_object_list[0].text.split('ポイント')[0])
+            point = int(tmp_item_point_object_list[0].text.split('ポイント')[0].replace(",",""))
             discount_value = value - point
+            discount_value = "{:,}".format(discount_value)
             tmp_item_list.append(value)                                                # 価格
             tmp_item_list.append(point)                                                # ポイント
             tmp_item_list.append(discount_value) #割引き後価格
             tmp_item_list.append(rakuten_img_path_list[n])                                #商品画像 () 
             tmp_item_list.append(tmp_item_name_and_link_object_list[n].attrib['href']) #商品詳細リンク
+            print(tmp_item_name_and_link_object_list[n].attrib['href'])
             rakuten_item_list.append(tmp_item_list)
         
         return rakuten_item_list
