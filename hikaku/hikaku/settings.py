@@ -15,10 +15,13 @@ import environ
 
 #環境変数用のBASE_DIR
 ENV_BASE_DIR = environ.Path(__file__) - 2 #.envファイルのディレクトリ
-env = environ.Env(DEBUG=(bool, False)) 
-READ_ENV_FILE = env.bool('DJANGO_READ_ENV_FILE', default=False)
+env = environ.Env(DEBUG=(bool, False),) 
+env_file = str(ENV_BASE_DIR.path('.env'))
 
-env = env.read_env(str(ENV_BASE_DIR.path(".env")))
+READ_ENV_FILE = env.bool('DJANGO_READ_ENV_FILE', default=False)
+if READ_ENV_FILE:
+    env.read_env(env_file)
+
 
 
 
@@ -152,9 +155,9 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 #静的ファイルを読み込むための設定
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, "static")
-]
+STATICFILES_DIRS = (
+    os.path.join(BASE_DIR, "static"),
+)
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
@@ -165,7 +168,7 @@ MEDIA_URL = '/media/'
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 #mail(メール)設定
 
-#EMAIL_BACKEND= 'django.core.mail.backends.smtp.EmailBackend'     #実際にメールを送信する(以下gmailで送信する場合) 
+EMAIL_BACKEND= 'django.core.mail.backends.smtp.EmailBackend'     #実際にメールを送信する(以下gmailで送信する場合) 
 """
 EMAIL_HOST = 'smtp.gmail.com' #gmail使用時はこのまま
 EMAIL_PORT = 587
@@ -199,13 +202,17 @@ ACCOUNT_USERNAME_REQUIRED = False
 
 #サインアップにメールアドレス確認を挟むよう設定
 ACCOUNT_EMAIL_VERIFICATION = 'none' #有効化する際は'mandatory'
-ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_EMAIL_REQUIRED = False
 
 #ログイン/ログアウト後の遷移先を設定
-LOGIN_REDIRECT_URL = 'scraping:index' #'accounts:home' ユーザーホーム画面の作成
+LOGIN_REDIRECT_URL = 'scraping:index'
 ACCOUNT_LOGOUT_REDIRECT_URL ='account_login'
 
 #ログアウトリンクのクリック一発でログアウトする設定
 ACCOUNT_LOGOUT_ON_GET = True
+ACCOUNT_FORMS = {
+    'signup': 'accounts.forms.MyCustomSignupForm'
+}
 
+ACCOUNT_ADAPTER = 'accounts.adapter.AccountAdapter'
 

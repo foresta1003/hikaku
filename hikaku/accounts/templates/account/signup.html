@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends 'account/base.html' %}
 
 {% block title %}サインアップ{% endblock %}
 
@@ -9,7 +9,7 @@
     <div class="row">
         <div class="my-div-style">
             <h1>サインアップ</h1>
-            <form mehod="post" action="{% url 'account_signup' %}"></form>
+            <form method="post" action="{% url 'account_signup' %}">
             {% csrf_token %}
             {{ form.as_p }}
             {% if redirect_field_value %}

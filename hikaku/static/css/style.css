@@ -8,20 +8,39 @@ header {
     color: #2e99a9;
 }
 
-/*
+
 hr {
-    border-width: 3px;
+    border-width: 10px;
     border-color: #2e99a9;
 }
-*/
 
-.hr_ver1 {
+
+hr.hr_bar_sharp {
     display: block;
-    border: 0;
-    border-width: 2px;
-    border-color: #dba45c;
+    border: 5;
+    height: 5;
+    border-width: 5px;
+    border-color: #098d04;
 }
 
+hr.bar1 {
+    display: block;
+    width: 100%;
+    height: 2px;
+    border-width: 2px;
+    background-color: #c59b28;
+    border: 1px; 
+}
+/*
+.bar1 {
+    display: block;
+    width: 100%;
+    height: 2px;
+    background-color: #3e11e4;
+    border-width: 2px;
+    border: 1px; 
+}
+*/
 h1 {
     font-size: 18px;
     font-weight: bold;
@@ -31,6 +50,12 @@ h1 {
 h3 {
     font-size: 10px;
     margin: 0;
+}
+
+h5 {
+    font-size: 20px;
+    text-align: center;
+
 }
 
 .align-right {
@@ -72,20 +97,37 @@ h3 {
 
 }
 
+.scraping_top_column {
+    margin-left: 5%;
+    width: 90%;
+    font-size: 20px;
+}
 .scraping_main {
-    margin-left: 10%;
-    width: 80%;
+    margin-left: 5%;
+    width: 90%;
     font-size: 15px;
 }
 
-.scraping_top_column {
-    margin-left: 10%;
-    width: 80%;
-    font-size: 20px;
-}
+
 
 .scraping_top_column_status {
     margin-left: 10%;
     width: 80%;
     font-size: 15px;
+}
+
+.home_top {
+    margin-left: 10%;
+    width: 80%;
+    font-size: 15px;
+}
+
+.center_main {
+    margin-left: 10%;
+    width: 80%;
+    font-size: 15px;
+}
+
+.center {
+    text-align: center;
 }

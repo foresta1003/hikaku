@@ -3,6 +3,7 @@
 <html lang="ja">
 
 <head>
+    <!--<link rel="stylesheet" href="../../../static/css/style.css">-->
     <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -23,41 +24,46 @@
         integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
         crossorigin="anonymous"></script>
 
-    <link rel="stylesheet" href="../../../static/css/style.css">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
+    {% block head %}{% endblock %}
     <!--後で調整すること-->
 
 
     <title>価格比較</title>
-    {% block head %}{% endblock %}
+
 </head>
 
 <body>
-
     <div class="container">
         <header>
             <div class="row">
-                <div class="col-sm-6">
+                <div class="col-sm-3">
                     <h1>価格比較</h1>
                 </div>
-                <div class="col-sm-6 align-right">
+                <div class="col-sm-6">
+                    <div class="row">
+                        <div class="col-sm-3"></div>
+                        <div class="col-sm-3">
+                            <a href="{% url 'account_logout' %}">ログアウト</a>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="col-sm-3 align-right center">
                     <a href="{% url 'home' %}">HOMEへ戻る</a>
                 </div>
             </div>
         </header>
+        <hr />
+        {% block contents %}{% endblock %}
 
-        <hr>
-    {% block contents %}{% endblock %}
-
-        <hr>
+        <hr />
 
         <footer>
             <p>&copy; sample</p>
 
         </footer>
     </div>
-
-
-
 </body>
 
 </html>
