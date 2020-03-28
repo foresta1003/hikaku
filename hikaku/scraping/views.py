@@ -32,7 +32,7 @@ class IndexView(generic.TemplateView):
         if request.user.is_authenticated:
             pass
         else:
-            return redirect("account_login")
+            return redirect("home")
 
         if self.item_name:
             self.item_name = request.GET.get("item_name")  # 検索窓に入力された商品名を取り出す

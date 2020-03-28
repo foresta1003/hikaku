@@ -1,0 +1,30 @@
+{% extends 'account/base.html' %}
+
+{% block title %}ユーザーホーム{% endblock %}
+
+{% block active_signup %} active{% endblock %}
+
+
+{% block contents %}
+<div class="home_top">
+    
+    <hr>
+    {% if user.is_authenticated %}
+    <h1>アカウント情報</h1>
+    <hr class="hr_bar_sharp">
+    <p>ユーザーネーム：{{ user.username }}</p>
+    <p>名前：{{ user.full_name }}</p>
+    <p>所属：{{ user.department }}</p>
+    <p>メールアドレス：{{ user.email }}</p>
+
+    {% else %}
+    <p><a href="{% url 'account_login' %}">こちらから</a>ログインしてください</p>
+    <p>アカウントがない場合は<a href="{% url 'account_signup' %}">こちらから</a></p>
+
+    {% endif %}
+    <hr>
+</div>
+
+
+
+{% endblock %}
