@@ -4,7 +4,9 @@ from allauth.account.views import *
 import requests
 from django.contrib.auth.models import User
 from accounts.models import CustomUser #自作のユーザーモデルを使用するために読み込む
+from scraping.models import ItemFavorite
 from accounts.forms import MyCustomSignupForm
+
 
 # Create your views here.
 
@@ -63,20 +65,27 @@ def signup_func(request):
 def home(request):
     print(CustomUser.objects.all())
     print(request.user)
-    u = request.user
-    print(type(u))
-    print(u != "AnonymousUser")
-    print(u)
-    print('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
-    if u.is_authenticated:
+    user_name = request.user
+    print(user_name, '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
+    if user_name.is_authenticated:
         print("333333333333333333suser")
         #username = request.GET.get("username")
-        user = CustomUser.objects.get(user_name=u)
+        user = CustomUser.objects.get(user_name=user_name)
         print(user.is_authenticated)
+        egistered_item_list = ItemFavorite.objects.filter(user_name=user_name)
+        try:
+            registered_item_list = ItemFavorite.objects.filter(user_name=user_name)
+        except:
+            registered_item_list = None
+            pass
+    
+        
         context = {
             "user" : user, 
+            "registered_item_list" : registered_item_list,
         }
         print('get dekita!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
+       
         return render(request, 'account/home.html', context)
     else:
         context = {
