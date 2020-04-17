@@ -8,8 +8,8 @@ class CustomUser(AbstractUser):
     #verbose_name_pluralは管理サイトの画面でわかりやすく表示させるためのもの、指定した名前でモデルを表示する
     class Meta:
         verbose_name_plural = "CustomUser"
-    
-    user_name = models.CharField(verbose_name='ユーザー名', max_length=30)
+
+#   usernameとしてデフォルトでユーザー名を保存するカラムが存在する　∴このusernameを使用することでユーザー名からデータを引っ張ってくることにする
     full_name = models.CharField('指名', max_length=20, blank=True)
     email = models.EmailField(verbose_name='email_address')
     department = models.CharField(verbose_name='所属', max_length=30)
@@ -17,6 +17,7 @@ class CustomUser(AbstractUser):
     create_time = models.DateField(verbose_name='作成日時', auto_now_add=True)
 
     def __str__(self):
-        return self.user_name
+        return str(self.username)
 
+#返す値のusernameはAbstractUserより継承しているもの野中から
 #検索履歴の保存機能

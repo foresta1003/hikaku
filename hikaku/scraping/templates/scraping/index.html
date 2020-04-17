@@ -11,7 +11,7 @@
 <!--tagsのなかの文字列でグループ分けを行っている-->
 <div class="scraping_top_column">
   <form action="{% url 'scraping:index' %}" method="get">
-    <input class="center" ype="text" size=50 name="item_name">
+    <input class="center" type="text" size=50 name="item_name">
     <button type="submit" class="btn btn-secondary">検索</button>
     {% csrf_token %}
     <br>
@@ -43,14 +43,36 @@
     <div class="col-sm-6">
       <p><img src="{{ item_list.0.5 }}" width="30%" height="30%" border="0" /></p>
       <p>{{ item_list.0.1 }}</p>
+      <p>商品価格 {{ item_list.0.2 }}</p>
+      <p>ポイント {{ item_list.0.3 }}</p>
       <p>【ポイント適用後価格】{{ item_list.0.4}}円</p>
       <p><a href="{{ item_list.0.6 }}">商品詳細リンク</a></p>
+      <form action="{% url 'scraping:register_favorite_item' %}" method='post'>
+        {% csrf_token %}
+        <input type='hidden' value="{{ item_list.0.0 }}" name="favorite_item_id">
+        <input type='hidden' value="{{ item_list.0.1 }}" name="favorite_item_name">
+        <input type='hidden' value="{{ item_list.0.6 }}" name="favorite_item_link">
+        <input type='hidden' value="{{ item_list.0.5 }}" name="favorite_item_image">
+        <input type='hidden' value="{{ item_list.0.4 }}" name="favorite_item_value">
+        <button type="submit" class="btn btn-secondary">お気に入り登録</button>
+      </form>
     </div>
     <div class="col-sm-6">
       <p><img src="{{ item_list.1.5 }}" width="20%" height="20%" border="0" /></p>
       <p>{{ item_list.1.1 }}</p>
+      <p>商品価格 {{ item_list.1.2 }}</p>
+      <p>ポイント {{ item_list.1.3 }}</p>
       <p>【ポイント適用後価格】{{ item_list.1.4}}円</p>
       <p><a href="{{ item_list.1.6 }}">商品詳細リンク</a></p>
+      <form action="{% url 'scraping:register_favorite_item' %}" method='post'>
+        {% csrf_token %}
+        <input type='hidden' value="{{ item_list.1.0 }}" name="favorite_item_id">
+        <input type='hidden' value="{{ item_list.1.1 }}" name="favorite_item_name">
+        <input type='hidden' value="{{ item_list.1.6 }}" name="favorite_item_link">
+        <input type='hidden' value="{{ item_list.1.5 }}" name="favorite_item_image">
+        <input type='hidden' value="{{ item_list.1.4 }}" name="favorite_item_value">
+        <button type="submit" class="btn btn-secondary">お気に入り登録</button>
+      </form>
     </div>
   </div>
   <hr />

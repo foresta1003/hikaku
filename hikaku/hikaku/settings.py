@@ -14,14 +14,11 @@ import os
 import environ
 
 #環境変数用のBASE_DIR
-ENV_BASE_DIR = environ.Path(__file__) - 2 #.envファイルのディレクトリ
-env = environ.Env(DEBUG=(bool, False),) 
+ENV_BASE_DIR = environ.Path(__file__) - 3 #.envファイルのディレクトリ
+env = environ.Env(DEBUG=(bool, False),) #デフォルトの値を設定している DEBUG=(キャスト, False)
 env_file = str(ENV_BASE_DIR.path('.env'))
 
-READ_ENV_FILE = env.bool('DJANGO_READ_ENV_FILE', default=False)
-if READ_ENV_FILE:
-    env.read_env(env_file)
-
+env.read_env(env_file)
 
 
 
@@ -35,10 +32,10 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = env('SECRET_KEY')
+SECRET_KEY = env("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = []
 
@@ -55,6 +52,7 @@ INSTALLED_APPS = [
 
     'scraping.apps.ScrapingConfig',
     'accounts.apps.AccountsConfig',
+    'inquiry.apps.InquiryConfig',
 
     'django.contrib.sites',
     'allauth',
@@ -98,7 +96,7 @@ WSGI_APPLICATION = 'hikaku.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'), #本番では変更
     }
 }
 
@@ -169,16 +167,16 @@ MEDIA_URL = '/media/'
 #mail(メール)設定
 
 EMAIL_BACKEND= 'django.core.mail.backends.smtp.EmailBackend'     #実際にメールを送信する(以下gmailで送信する場合) 
-"""
+
 EMAIL_HOST = 'smtp.gmail.com' #gmail使用時はこのまま
 EMAIL_PORT = 587
-EMAIL_HOST_USER = 'spam@gmail.com'#環境変数を使用する事
-EMAIL_HOST_PASSWORD = 'gmailパスワード'　＃二段階認証時は二段階目のパスを入れること ※設定時は環境変数から読み込み直接記入しない事
-EMAIL_USE_TLS = True
-"""
+EMAIL_HOST_USER = env("EMAIL_ADDRESS") #環境変数を使用する事
+EMAIL_HOST_PASSWORD = env("EMAIL_PASSWORD") #二段階認証時は二段階目のパスを入れること ※設定時は環境変数から読み込み直接記入しない事
+EMAIL_USE_TLS = True    
+
 
 # 開発環境において(コンソールに表示させる)
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+#EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 #以下は認証機能
@@ -194,15 +192,16 @@ AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend', #管理サイト用(ユーザー名認証)
 )
 
-"""
+
 #メールアドレス認証に変更する設定
-ACCOUNT_AUTHENTICATION_METHOD ='email'
-ACCOUNT_USERNAME_REQUIRED = False
-"""
+#ACCOUNT_AUTHENTICATION_METHOD ='email'
+#ACCOUNT_USERNAME_REQUIRED = False
+
 
 #サインアップにメールアドレス確認を挟むよう設定
-ACCOUNT_EMAIL_VERIFICATION = 'none' #有効化する際は'mandatory'
-ACCOUNT_EMAIL_REQUIRED = False
+#ACCOUNT_EMAIL_VERIFICATION = 'none' #有効化する際は'mandatory'
+ACCOUNT_EMAIL_VERIFICATION = 'mandatory' #有効化する際は'mandatory'
+ACCOUNT_EMAIL_REQUIRED = True
 
 #ログイン/ログアウト後の遷移先を設定
 LOGIN_REDIRECT_URL = 'scraping:index'

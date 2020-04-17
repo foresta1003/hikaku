@@ -102,6 +102,7 @@ h5 {
     width: 90%;
     font-size: 20px;
 }
+
 .scraping_main {
     margin-left: 5%;
     width: 90%;
@@ -111,15 +112,25 @@ h5 {
 
 
 .scraping_top_column_status {
-    margin-left: 10%;
-    width: 80%;
+    margin-left: 5%;
+    width: 90%;
     font-size: 15px;
 }
 
 .home_top {
-    margin-left: 10%;
-    width: 80%;
+    margin-left: 5%;
+    width: 90%;
     font-size: 15px;
+}
+
+.inquiry_top {
+    margin-left: 5%;
+    width: 90%;
+    font-size: 15px;
+}
+
+.inquiry_font_big {
+    font-size: 20px;
 }
 
 .center_main {
@@ -132,6 +143,11 @@ h5 {
     text-align: center;
 }
 
-.top_mergin {
-    
+.top_margin {
+    margin-bottom: 10px;
+}
+
+.large_string {
+    font-size: 30px;
+    color: #bd1640;
 }

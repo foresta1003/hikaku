@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 from django.views import generic
 from .models import ItemFavorite
 from accounts.models import CustomUser
+from scraping.models import ItemFavorite
 import os
 import requests
 import lxml.html
@@ -35,7 +36,6 @@ class IndexView(generic.TemplateView):
         #ユーザーがログインしていない場合はログイン画面にリダイレクトさせる
         if request.user.is_authenticated:
             user_id = request.user.id
-            print(user_id)
             pass
         else:
             return redirect("home")
@@ -48,7 +48,6 @@ class IndexView(generic.TemplateView):
                 self.item_status = "0"
             if self.item_order == None:
                 self.item_order = "0"
-            print(self.item_status,self.item_order)
             
             # リストの形式で返されるので下記のように値を取り出す
 
@@ -88,7 +87,7 @@ class IndexView(generic.TemplateView):
 
         req = requests.get(self.site_url_yahoo, params={'p': item_name, 'used': yahoo_item_status})
         html_yahoo = lxml.html.fromstring(req.text)
-
+        
         tmp_item_name_object_list = html_yahoo.xpath("//a[@class='_2EW-04-9Eayr']/span")  # 商品名
         tmp_item_value_object_list = html_yahoo.xpath("//span[@class='_3-CgJZLU91dR']")  # 値段
         tmp_item_point_percentage_object_list = html_yahoo.xpath("//span[@class='VppfHNxe1EAG']")  # ポイント「値引き率(文字列)」 値のみ取り出される
@@ -98,6 +97,15 @@ class IndexView(generic.TemplateView):
         
         yahoo_img_src_list = [tmp_item_img_src_object_list[n].attrib["src"] for n in range(5)] #５つ分の画像のソースURLを取り出す
 
+        #商品名を取得する際のタグが<span>が二つに分かれている場合があるためもう一度取得しておく
+        #通常の場合は<span>商品名</span>
+        #この場合があるため→<span></span><span>商品名</span>
+        try:
+            tmp_item_name_object_list_2 = html_yahoo.xpath("//a[@class='_2EW-04-9Eayr']/span[2]")  # 商品名
+        except:
+            pass
+
+
         # 商品の画像URLリストを渡して、画像を保存する処理
         item_img_path_list = self.download_item_image_and_create_path_list("yahoo", yahoo_img_src_list)
 
@@ -106,18 +114,23 @@ class IndexView(generic.TemplateView):
         yahoo_item_list = [] #[index, ,商品名, 価格, ポイント, ポイント適用後の価格, 商品画像, 商品詳細ページへのリンクURL])
         now = str(time.time()).replace(".","") #indexを作成するため　現在時刻と商品名からindexを作成する
         count = 1
+        item_name_offset = 0 #商品名が取得できていない場合にもう一方のリストより取得するためのもの
         for n in range(5): #
             tmp_item_list = []
             index = now + "_yahoo_" + str(count)
             tmp_item_list.append(index) #index
-            tmp_item_list.append(tmp_item_name_object_list[n].text) #商品名
+            if tmp_item_name_object_list[n].text == None: #←←←ここ少しぎっくりした
+                tmp_item_list.append(tmp_item_name_object_list_2[item_name_offset].text)
+                item_name_offset += 1
+            else:
+                tmp_item_list.append(tmp_item_name_object_list[n].text) #商品名
             
             value = int(tmp_item_value_object_list[n].text.replace(",", "")) #価格
             point_percentage  = int(tmp_item_point_percentage_object_list[n].text) #ポイントのパーセンテージ
             point = value * point_percentage // 100 #ポイント
             value_after_discount = value - point #割引き後価格(値段からパーセンテージを差し引いた価格)
             value_after_discount = "{:,}".format(value_after_discount)
-            tmp_item_list.append(value)
+            tmp_item_list.append(tmp_item_value_object_list[n].text)
             tmp_item_list.append(point)
             tmp_item_list.append(value_after_discount) 
             tmp_item_list.append(item_img_path_list[n]) #商品画像(ローカルのパス)
@@ -136,7 +149,7 @@ class IndexView(generic.TemplateView):
         """商品検索及びリスト作成"""
         if self.item_status == "1":  # 新品ならば
             rakuten_item_status = "0"
-        elif self.item_order == "2":  # 中古ならば
+        elif self.item_status == "2":  # 中古ならば
             rakuten_item_status = "1"
         else:
             rakuten_item_status = "0"
@@ -164,17 +177,17 @@ class IndexView(generic.TemplateView):
             tmp_item_list = [] 
             tmp_item_list.append(n+1)
             tmp_item_list.append(tmp_item_name_and_link_object_list[n].text)  #商品名
-            value = int(tmp_item_value_object_list[0].text.replace(",", ""))
-            point = int(tmp_item_point_object_list[0].text.split('ポイント')[0].replace(",",""))
+            value = int(tmp_item_value_object_list[n].text.replace(",", ""))
+            point = int(tmp_item_point_object_list[n].text.split('ポイント')[0].replace(",",""))
             discount_value = value - point
             discount_value = "{:,}".format(discount_value)
-            tmp_item_list.append(value)                                                # 価格
+            tmp_item_list.append(tmp_item_value_object_list[n].text)                                                # 価格
             tmp_item_list.append(point)                                                # ポイント
             tmp_item_list.append(discount_value) #割引き後価格
             tmp_item_list.append(rakuten_img_path_list[n])                                #商品画像 () 
             tmp_item_list.append(tmp_item_name_and_link_object_list[n].attrib['href']) #商品詳細リンク
-            print(tmp_item_name_and_link_object_list[n].attrib['href'])
             rakuten_item_list.append(tmp_item_list)
+            print(discount_value)
         
         return rakuten_item_list
 
@@ -198,82 +211,115 @@ class IndexView(generic.TemplateView):
     
 #商品のお気に入り登録
 def favorite_item_register(request):
-    if request.method == "GET":
-        return redirect("home")
-
-    favorite_item_id = request.POST.get("favorite_item_id")
-    favorite_item_name = request.POST.get("favorite_item_name")
-    favorite_item_link = request.POST.get("favorite_item_link")
-    favorite_item_image_url = request.POST.get("favorite_item_image")
-    new_favorite_item_image_directory_path = "media/favorite_images/" #実際のデータを取り出してデータベースに格納するには？
-    favorite_item_value = request.POST.get("favorite_item_value")
-    
-
-    #永続的に保存するディレクトリにコピーする(データベースから参照するために保存するためのディレクトリ)　※tmp_imageディレクトリ内は一定時間後に削除する　
-    shutil.copy(favorite_item_image_url, new_favorite_item_image_directory_path)
-    image_file_name = favorite_item_image_url.replace('/media/tmp_images/','') #画像ファイルの名前をパスから取り出す
-
-    print(favorite_item_image_url, )
-    
-    #ユーザーのIDをデータベースから引っ張ってくる　※名前で登録しても良いのだ 
-    if request.user != "AnonymousUser":
-        user_object = CustomUser.objects.get(user_name=request.user)
-        user_name = user_object.user_name
-    print(user_object, user_name)
-
-    #データベースへお気に入り商品のデータを登録(画像はパスを保存する)
-    favorite_item = ItemFavorite(
-        item_id = image_file_name, #画像を検索するためのインデックス
-        user_name = user_object, #CustomUserのインスタンスを与えないといけない
-        item_name = favorite_item_name,
-        item_image_path = new_favorite_item_image_directory_path + '/' + image_file_name, #永続的な保存先のパス
-        item_link_url = favorite_item_link,
-        item_value = favorite_item_value
-    )
-    print(favorite_item_image_url, new_favorite_item_image_directory_path, image_file_name)
-
     try:
-        favorite_item_object_list = ItemFavorite.objects.filter(user_name=request.user)
-    except:
-        favorite_item_object = None
-    
-    context = {
-        "registered_item_name" : favorite_item_name, #登録をしようとしている商品名
-        "favorite_item_object_list" : favorite_item_object_list, #お気に入りに登録している商品一覧
+        if request.method == "GET":
+            return redirect("home")
 
-    }
-    favorite_item.save()
-    print(id)
-    return render(request, 'account/home.html', context)
+        favorite_item_id = request.POST.get("favorite_item_id")
+        favorite_item_name = request.POST.get("favorite_item_name")
+        favorite_item_link = request.POST.get("favorite_item_link")
+        favorite_item_image_url = request.POST.get("favorite_item_image")
+        new_favorite_item_image_directory_path = "media/favorite_images/" #実際のデータを取り出してデータベースに格納するには？
+        favorite_item_value = request.POST.get("favorite_item_value")
+        
+
+        #永続的に保存するディレクトリにコピーする(データベースから参照するために保存するためのディレクトリ)　※tmp_imageディレクトリ内は一定時間後に削除する　
+        
+        #ユーザーのIDをデータベースから引っ張ってくる　※名前で登録しても良いのだ 
+        if request.user != "AnonymousUser":
+            user_object = CustomUser.objects.get(username=request.user)
+
+        #print(type(user_object), type(user_name), type(request.user))　←ハマったところ
+
+        image_file_name = favorite_item_image_url.replace('media/tmp_images/','') #画像ファイルの名前をパスから取り出す
+        #もし同じ商品をお気に入りに登録していた場合は警告を出して登録できないようにする
+        
+
+
+        #データベースへお気に入り商品のデータを登録(画像はパスを保存する)
+        favorite_item = ItemFavorite(
+            item_id = image_file_name, #画像を検索するためのインデックス
+            username = user_object.username, #CustomUserのインスタンスを与えないといけない　ユーザー名をデータベースから取り出していれる
+            item_name = favorite_item_name,
+            item_image_path = new_favorite_item_image_directory_path + image_file_name, #永続的な保存先のパス
+            item_link_url = favorite_item_link,
+            item_value = favorite_item_value
+        )
+        registered_item_list = ItemFavorite.objects.filter(username=user_object.username) #request.user等では型が違うためフィルターにかからないため気を付ける
+        try:
+            registered_item_list = ItemFavorite.objects.filter(username=user_object.username) #request.user等では型が違うためフィルターにかからないため気を付ける
+        except:
+            registered_item_list = None
+
+        #商品が既にお気に入りに登録されているかを確かめる処理　
+        
+        try:
+            item_objects = ItemFavorite.objects.get(item_id=image_file_name)        
+            item_exist_flag = 1
+            
+        except:
+            item_exist_flag = 0
+
+        #既にお気に入りに登録されている場合の処理
+        if item_exist_flag == 1:
+            warning_sentence = "既にお気に入りに登録されています"
+            context = {
+                "warning_sentence": warning_sentence,
+                "registered_item_list": registered_item_list,
+            }
+            return render(request, 'account/home.html', context)
+
+        #新規でお気に入りに登録する
+        else:
+            #画層ファイルを保存するためのフォルダにコピーする処理　一定時間後に元の一時的に保存するためのフォルダ内の画像ファイルを削除するため
+            shutil.copy(favorite_item_image_url, new_favorite_item_image_directory_path)
+            image_file_name = favorite_item_image_url.replace('media/tmp_images/','') #画像ファイルの名前をパスから取り出す
+
+            favorite_item.save()
+            
+            context = {
+                "favorite_item_name" : favorite_item_name, #登録をしようとしている商品名
+                "registered_item_list" : registered_item_list, #お気に入りに登録している商品一覧
+            }
+            
+            return render(request, 'account/home.html', context)
+    except:
+        return redirect("home")
 
 #商品お気に入り削除　(アカウントのviewに書くべきか悩む)
 def favorite_item_delete(request):
-    #単にアクセスしてきたならリダイレクトさせる
-    if request.method == 'GET':
+    try:
+        #単にアクセスしてきたならリダイレクトさせる
+        if request.method == 'GET':
+            return redirect("home")
+        username = request.user
+
+        delete_item_id = request.POST.get("item_id") #リクエストの中から対象のIDを取得する　データベースから削除する際に使用
+        delete_item_name = request.POST.get("item_name") #サーバーから削除する際に使用　使用しなくても良いか
+
+        #関連される画像を削除する処理 (実際の保存場所から)
+        delete_item_object = ItemFavorite.objects.get(item_id=delete_item_id)
+        delete_item_image_path = delete_item_object.item_image_path #サーバーでの画像ファイルの保存先パス
+        delete_item_name = delete_item_object.item_name #削除する商品名　javascriptでポップアップでも出そうか
+
+        #削除したい商品を商品IDを元にデータベースから削除する処理
+        ItemFavorite.objects.filter(item_id=delete_item_id).delete() 
+        
+
+        os.remove(delete_item_image_path)
+        
+        #ユーザーのお気に入り登録済みの商品一覧を取得　空ならばNoneを返す
+        try:
+            registered_item_list = ItemFavorite.objects.filter(username=username)
+        except:
+            registered_item_list = None
+        
+        context = {
+            "registered_item_list" : registered_item_list,
+        }
+        
+
+        return render(request, 'account/home.html', context)
+    except:
         return redirect("home")
 
-    delete_item_id = request.POST.get("item_id") #リクエストの中から対象のIDを取得する　データベースから削除する際に使用
-    delete_item_name = request.POST.get("item_name") #サーバーから削除する際に使用　使用しなくても良いか
-
-    #関連される画像を削除する処理 (実際の保存場所から)
-    delete_item_object = ItemFavorite.objects.get(item_id=delete_item_id)
-    delete_item_image_path = delete_item_object.item_image_path #サーバーでの画像ファイルの保存先パス
-    delete_item_name = delete_item_object.item_name #削除する商品名　javascriptでポップアップでも出そうか
-
-    #削除したい商品を商品IDを元にデータベースから削除する処理
-    ItemFavorite.objects.filter(item_id=delete_item_id).delete() 
-    
-
-    os.remove(delete_item_image_path)
-    
-    #ユーザーのお気に入り登録済みの商品一覧を取得　空ならばNoneを返す
-    try:
-        favorite_item_object = ItemFavorite.objects.filter(user_name=request.user)
-    except:
-        favorite_item_object = None
-    
-    context = {
-        "favorite_item_object_list" : favorite_item_object_list,
-    }
-
-    return render(request, 'account/home.html', context)

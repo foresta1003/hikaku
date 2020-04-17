@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="ja">
 
+{% load static %}
 <head>
     <!-- Required meta tags -->
     <meta charset="utf-8">
@@ -22,7 +23,9 @@
         integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
         crossorigin="anonymous"></script>
 
-    <link rel="stylesheet" href="../../../static/css/style.css">
+    <!--<link rel="stylesheet" href="../../../static/css/style.css">-->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+
     <!--後で調整すること-->
 
 
@@ -37,17 +40,32 @@
                 <div class="col-sm-3">
                     <h1>価格比較</h1>
                 </div>
+                <div class="col-sm-6">
+
+                </div>
+                <div class="col-sm-3">
+                    <a href="{% url 'inquiry:self_introduction' %}">PROFILE</a>
+                </div>
+            </div>
+            <br>
+            <div class="row">
+                <div class="col-sm-3">
+                    {% if is_authenticated %}                    
+                    <h1>ログインすると検索できます</h1>
+                    {% else %}
+                    <h1>MENU</h1>
+                    {% endif %}                    
+                </div>
 
                 <div class="col-sm-6">
                     <div class="row">
                         {% if user.is_authenticated %}
                         <div class="col-sm-6">
-                            <a href="{% url 'scraping:index' %}">商品比較</a>
+                            <a href="{% url 'scraping:index' %}">検索</a>
                         </div>
                         <div class="col-sm-6">
                             <a href="{% url 'account_logout' %}">ログアウト</a>
                         </div>
-
 
                         {% else %}
                         <div class="col-sm-6">
@@ -67,13 +85,13 @@
         </header>
     </div>
 
-
-    {% block contents %}{% endblock %}
-    
+    <div class="container">
+        {% block contents %}{% endblock %}
+    </div>
     <div class="container">
         <hr>
         <footer>
-            <p>&copy; sample</p>
+            <p>&copy; foresta-tech.org</p>
 
         </footer>
     </div>

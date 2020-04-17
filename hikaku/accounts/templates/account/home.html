@@ -1,5 +1,6 @@
 {% extends 'account/base.html' %}
 
+{% load static %}
 {% block title %}ユーザーホーム{% endblock %}
 
 {% block active_signup %} active{% endblock %}
@@ -9,9 +10,6 @@
 <div class="home_top">
     {% if user.is_authenticated %}
     {% else %}
-    <p>商品の価格比較サイトです</p>
-    <p>楽天、yahooから該当の商品情報を取り出し、商品購入時に取得できるポイント分を差し引いた価格を表示します。</p>
-    <p>両方のサイトから取得した情報を、比較できるサイトです。</p>
     {% endif %}
     
     <hr>
@@ -19,11 +17,71 @@
     <h1>アカウント情報</h1>
     <hr class="hr_bar_sharp">
     <p>ユーザーネーム：{{ user.username }}</p>
-    <p>名前：{{ user.full_name }}</p>
     <p>所属：{{ user.department }}</p>
     <p>メールアドレス：{{ user.email }}</p>
+    <hr>
+
+    {% if warning_sentence %}
+    <h1 class="large_string">既に登録されています</h1>
+    <br>
+    {% endif %}
+
+    {% if registered_item_list %}
+    <h1>お気に入り登録一覧</h1>
+    {% for item in registered_item_list %}
+    <hr class="hr_bar_sharp">
+    <p>{{ item.item_name }}</p>
+    <!--イメージのソースが相対パスになっていたので頭に/をつける-->
+    <p><img src="/{{ item.item_image_path }}" width="20%" height="20%" border="0" /></p>
+    <p>商品価格：{{ item.item_value }}</p>
+    <p><a href="{{ item.item_link_url }}">商品詳細</a> </p>
+    <form method='post' action="{% url 'scraping:delete_favorite_item' %}">
+        {% csrf_token %}
+        <input type='hidden' value="{{ item.item_id }}" name="item_id">
+        <button type='submit' class='btn btn-secondary'>お気に入りから削除</button>
+    </form>
+
+    {% endfor %}
+    {% endif %}
 
     {% else %}
+    <p>※ポートフォリオ用に作成しているサイトです</p>
+    <p>　興味を持った機能等を試すために、AWSにてWEBサーバーを公開しています</p>
+    <br>
+    <p>※使用している技術</p>
+    <p>　python3.7,　Django3.0　を使用して作成しています。</p>
+    <br>
+    <p>※作成した経緯</p>
+    <p>　個人的な趣味に使うデータを収集するためにスクレイピングの勉強をしていました。</p>
+    <p>　この技術をポートフォリオとしても活用しようと考えたのが、当サイトを作成した経緯になります。</p>
+    <br>
+    <p>※以下注意点</p>
+    <p>　基本的に登録情報は数日で削除させていただきます。</p>
+    <p>　また1時間おきにバッチ処理をする関係上、毎時0分あたりではサイトがうまく動かない可能性がありますのでご了承ください。</p>
+
+    <br>
+    <p>※機能説明</p>
+    <p>　商品の価格比較サイトのようなものです</p>
+    
+    <p>　楽天市場、yahoo shopping から検索をかけた商品情報を取り出して表示し、</p>
+    <p>　商品購入時に取得できるポイント分を差し引いた価格を計算して商品の情報を表示します。</p>
+
+    <br>
+    <p>※利用方法</p>
+    <p>①ユーザーの登録（ユーザー認証をした状態で機能を使うことができます）</p>
+    <p>　登録時はメール認証を挟みますので、メッセージを受け取ることができるフリーメールや10minutesメール等を利用して登録してください。</p>
+    <p>②登録後は、上記の「価格比較」タグを押していただくと検索ページに移動します。</p>
+    <p>　商品検索はログインした状態でのみ、使用できるようになります。</p> 
+    <p>③簡単な機能の検証</p>
+    <p>　登録した商品情報をお気に入りに登録することができます。</p>
+    <p>　検索した商品をお気に入りに登録すると、ユーザーのページから登録した商品をいつでも見ることができます。</p>
+
+    <hr class="hr_bar_sharp">
+    <p>ユーザー登録機能を使わずに商品検索機能を試したい方は、</p>
+    <p>ユーザー：user1230</p>
+    <p>パスワード：usernopassword1230</p>
+    <p>上記のアカウントにてログインし、機能を試してください</p>
+
     <p>登録済みの方は<a href="{% url 'account_login' %}">こちら</a>からログインしてください</p>
     <p>初めての方は<a href="{% url 'account_signup' %}">こちら</a>から登録</p>
 
